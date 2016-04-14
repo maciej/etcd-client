@@ -25,7 +25,7 @@ trait EtcdClient {
                     prevValue: Option[String] = None, prevIndex: Option[Int] = None,
                     prevExist: Option[Boolean] = None): Future[EtcdResponse]
 
-  def clearTTL(key: String): Future[EtcdResponse]
+  def clearTtl(key: String): Future[EtcdResponse]
 
   def create(parentKey: String, value: String): Future[EtcdResponse]
 

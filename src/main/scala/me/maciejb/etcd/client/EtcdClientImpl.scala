@@ -53,7 +53,7 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
     call(PUT, key, Some("value" → value), opt("ttl", ttl), opt("prevValue", prevValue),
       opt("prevIndex", prevIndex), opt("prevExist", prevExist))
 
-  def clearTTL(key: String): Future[EtcdResponse] =
+  def clearTtl(key: String): Future[EtcdResponse] =
     call(PUT, key, Some("ttl" → ""), Some("prevExists" → "true"))
 
   def create(parentKey: String, value: String): Future[EtcdResponse] =
