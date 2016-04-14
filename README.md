@@ -1,12 +1,10 @@
-Akka HTTP based etcd client
-===========================
+# Akka HTTP based etcd client
 [![Build Status][travis-ci-badge]][travis-ci-link]
 
 
 This module provides a fully asynchronous client for etcd 2.x implemented using Akka HTTP.
 
-Note on running tests
----------------------
+## Note on running tests
 
 The integration tests require an instance of etcd running at `localhost:4001`. This can be easily
 accomplished using Docker:
