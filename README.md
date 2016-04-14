@@ -1,4 +1,5 @@
 # Akka HTTP based etcd client
+[![Maven Central][maven-central-badge]][maven-central-link]
 [![Build Status][travis-ci-badge]][travis-ci-link]
 
 
@@ -16,5 +17,7 @@ docker-compose up
 ## Resources
 * [etcd-client at bintray](https://bintray.com/maciej/maven/etcd-client/)
 
+[maven-central-badge]: https://maven-badges.herokuapp.com/maven-central/me.maciejb.etcd-client/etcd-client_2.11/badge.svg
+[maven-central-link]: https://maven-badges.herokuapp.com/maven-central/me.maciejb.etcd-client/etcd-client_2.11
 [travis-ci-badge]: https://travis-ci.org/maciej/etcd-client.svg
 [travis-ci-link]: https://travis-ci.org/maciej/etcd-client
