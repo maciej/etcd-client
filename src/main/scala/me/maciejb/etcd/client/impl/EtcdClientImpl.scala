@@ -1,4 +1,4 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
 
 import java.net.URLEncoder
 
@@ -13,6 +13,7 @@ import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.scaladsl._
 import akka.stream.{Materializer, SourceShape}
 import akka.util.ByteString
+import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
 import me.maciejb.etcd.streams.FlowBreaker
 import spray.json._
 
@@ -21,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * `etcd` client implementation.
   */
-private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
+private[client] class EtcdClientImpl(host: String, port: Int = 4001,
                                    httpClientSettings: Option[ClientConnectionSettings] = None)
                                   (implicit ec: ExecutionContext,
                                    system: ActorSystem,

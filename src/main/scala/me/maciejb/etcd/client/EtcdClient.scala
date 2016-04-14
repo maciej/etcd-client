@@ -4,6 +4,7 @@ import akka.actor.{ActorRefFactory, ActorSystem, Cancellable}
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
+import me.maciejb.etcd.client.impl.EtcdClientImpl
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,13 +17,18 @@ trait EtcdClient {
 
   def get(key: String, recursive: Boolean = false, sorted: Boolean = false): Future[EtcdResponse]
 
-  def wait(key: String, waitIndex: Option[Int] = None, recursive: Boolean = false,
-           sorted: Boolean = false, quorum: Boolean = false): Future[EtcdResponse]
+  def wait(key: String,
+           waitIndex: Option[Int] = None,
+           recursive: Boolean = false,
+           sorted: Boolean = false,
+           quorum: Boolean = false): Future[EtcdResponse]
 
   def set(key: String, value: String, ttl: Option[Int] = None): Future[EtcdResponse]
 
-  def compareAndSet(key: String, value: String, ttl: Option[Int] = None,
-                    prevValue: Option[String] = None, prevIndex: Option[Int] = None,
+  def compareAndSet(key: String, value: String,
+                    ttl: Option[Int] = None,
+                    prevValue: Option[String] = None,
+                    prevIndex: Option[Int] = None,
                     prevExist: Option[Boolean] = None): Future[EtcdResponse]
 
   def clearTtl(key: String): Future[EtcdResponse]
@@ -33,9 +39,13 @@ trait EtcdClient {
 
   def delete(key: String, recursive: Boolean = false): Future[EtcdResponse]
 
-  def compareAndDelete(key: String, prevValue: Option[String] = None, prevIndex: Option[Int] = None): Future[EtcdResponse]
+  def compareAndDelete(key: String,
+                       prevValue: Option[String] = None,
+                       prevIndex: Option[Int] = None): Future[EtcdResponse]
 
-  def watch(key: String, waitIndex: Option[Int] = None, recursive: Boolean = false,
+  def watch(key: String,
+            waitIndex: Option[Int] = None,
+            recursive: Boolean = false,
             quorum: Boolean = false): Source[EtcdResponse, Cancellable]
 
 }

@@ -1,14 +1,14 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Keep
 import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
+import me.maciejb.etcd.client.{EtcdError, _}
 import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.time._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

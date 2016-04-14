@@ -1,7 +1,8 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
 
 import java.time.Month
 
+import me.maciejb.etcd.client.EtcdNode
 import org.scalatest.{FlatSpec, Matchers}
 import spray.json._
 

@@ -1,17 +1,15 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
 
-import scala.concurrent.Future
-import scala.concurrent.Promise
-import scala.concurrent.duration.DurationInt
-import org.mockito.Mockito.when
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.FlatSpecLike
-import org.scalatest.Matchers
-import org.scalatest.mock.MockitoSugar
 import akka.actor.ActorSystem
-import akka.testkit.TestKit
-import akka.testkit.TestProbe
 import akka.stream.StreamTcpException
+import akka.testkit.{TestKit, TestProbe}
+import me.maciejb.etcd.client.{EtcdException, _}
+import org.mockito.Mockito.when
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
+import org.scalatest.mock.MockitoSugar
+
+import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration.DurationInt
 
 class EtcdOperationActorSpec(_system: ActorSystem) extends TestKit(_system)
     with FlatSpecLike with BeforeAndAfterAll with Matchers with MockitoSugar {
