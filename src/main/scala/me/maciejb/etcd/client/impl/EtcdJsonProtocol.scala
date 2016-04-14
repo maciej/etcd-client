@@ -1,14 +1,15 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
 
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+import me.maciejb.etcd.client.{EtcdError, EtcdNode, EtcdResponse}
 import spray.json._
 
 /**
   * Provides Spray JSON format implicits for `etcd` messages.
   */
-object EtcdJsonProtocol extends DefaultJsonProtocol {
+private[client] object EtcdJsonProtocol extends DefaultJsonProtocol {
 
   /** Spray JSON format for [[EtcdError]] case class. */
   implicit val etcdErrorFormat = jsonFormat4(EtcdError.apply)
