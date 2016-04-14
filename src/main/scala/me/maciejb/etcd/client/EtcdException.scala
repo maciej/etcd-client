@@ -1,4 +1,4 @@
-package pl.caltha.akka.etcd
+package me.maciejb.etcd.client
 
 /**
   * Thrown when `etcd` request fails.

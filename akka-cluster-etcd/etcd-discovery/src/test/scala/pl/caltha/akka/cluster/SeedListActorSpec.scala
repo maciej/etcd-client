@@ -2,14 +2,11 @@ package pl.caltha.akka.cluster
 
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
-
 import org.mockito.Mockito
-
 import akka.actor.FSM.SubscribeTransitionCallBack
 import akka.actor.actorRef2Scala
-
+import me.maciejb.etcd.client.EtcdException
 import pl.caltha.akka.etcd.EtcdError
-import pl.caltha.akka.etcd.EtcdException
 import pl.caltha.akka.etcd.EtcdNode
 import pl.caltha.akka.etcd.EtcdResponse
 

@@ -1,8 +1,8 @@
-package pl.caltha.akka.etcd
+package me.maciejb.etcd.client
 
 import akka.actor.{ActorSystem, Cancellable}
-import akka.stream.scaladsl.Source
 import akka.http.scaladsl.settings.ClientConnectionSettings
+import akka.stream.scaladsl.Source
 
 import scala.concurrent.Future
 

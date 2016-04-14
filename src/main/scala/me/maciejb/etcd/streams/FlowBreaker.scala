@@ -1,4 +1,4 @@
-package pl.caltha.akka.streams
+package me.maciejb.etcd.streams
 
 import java.util.concurrent.atomic.AtomicBoolean
 

@@ -4,14 +4,17 @@ import scala.concurrent.duration.DurationInt
 import akka.actor.FSM.SubscribeTransitionCallBack
 import org.mockito.Mockito
 import pl.caltha.akka.etcd.EtcdResponse
+
 import scala.concurrent.Promise
 import pl.caltha.akka.etcd.EtcdNode
 import java.time.ZonedDateTime
+
 import pl.caltha.akka.etcd.EtcdNode
 import java.time.ZonedDateTime
+
 import pl.caltha.akka.etcd.EtcdError
-import pl.caltha.akka.etcd.EtcdException
 import akka.stream.StreamTcpException
+import me.maciejb.etcd.client.EtcdException
 
 class LeaderEntryActorSpec extends EtcdFSMSpecBase[LeaderEntryActor.State, LeaderEntryActor.Data] {
 

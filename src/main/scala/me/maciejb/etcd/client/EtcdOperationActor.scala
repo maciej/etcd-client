@@ -1,4 +1,4 @@
-package pl.caltha.akka.etcd
+package me.maciejb.etcd.client
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration

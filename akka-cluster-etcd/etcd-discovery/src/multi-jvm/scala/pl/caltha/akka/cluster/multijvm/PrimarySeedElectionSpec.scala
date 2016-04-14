@@ -5,8 +5,8 @@ import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.remote.testkit.{MultiNodeConfig, MultiNodeSpec}
 import com.typesafe.config.ConfigFactory
+import me.maciejb.etcd.client.EtcdClient
 import pl.caltha.akka.cluster.{ClusterDiscovery, ClusterDiscoverySettings}
-import pl.caltha.akka.etcd.EtcdClient
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt

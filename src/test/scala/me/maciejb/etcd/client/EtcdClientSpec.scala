@@ -1,19 +1,17 @@
-package pl.caltha.akka.etcd
-
-import akka.testkit.TestKit
-
-import scala.concurrent.Future
-import scala.concurrent.duration._
-
-import org.scalatest._
-import org.scalatest.Matchers._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time._
+package me.maciejb.etcd.client
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.testkit.scaladsl.TestSink
 import akka.stream.scaladsl.Keep
+import akka.stream.testkit.scaladsl.TestSink
+import akka.testkit.TestKit
+import org.scalatest.Matchers._
+import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time._
+
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll {
 

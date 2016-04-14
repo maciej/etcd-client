@@ -2,7 +2,6 @@ package pl.caltha.akka.cluster
 
 import scala.collection.immutable.Set
 import scala.concurrent.Future
-
 import akka.actor.Address
 import akka.actor.AddressFromURIString
 import akka.actor.LoggingFSM
@@ -15,14 +14,13 @@ import akka.cluster.ClusterEvent.MemberExited
 import akka.cluster.ClusterEvent.MemberRemoved
 import akka.cluster.ClusterEvent.MemberUp
 import akka.pattern.pipe
-
-import pl.caltha.akka.etcd.EtcdClient
 import pl.caltha.akka.etcd.EtcdError
 import pl.caltha.akka.etcd.EtcdException
 import pl.caltha.akka.etcd.EtcdNode
 import pl.caltha.akka.etcd.EtcdResponse
 import akka.cluster.ClusterEvent._
 import akka.cluster.Member
+import me.maciejb.etcd.client.{EtcdClient, EtcdException}
 
 class ClusterDiscoveryActor(
     etcdClient: EtcdClient,

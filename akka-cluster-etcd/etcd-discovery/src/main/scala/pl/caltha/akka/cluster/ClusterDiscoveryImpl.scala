@@ -4,7 +4,7 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.Extension
 import akka.cluster.Cluster
 import akka.http.scaladsl.settings.ClientConnectionSettings
-import pl.caltha.akka.etcd.EtcdClient
+import me.maciejb.etcd.client.EtcdClient
 
 class ClusterDiscoveryImpl(extendedSystem: ExtendedActorSystem) extends Extension {
 

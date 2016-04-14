@@ -3,12 +3,10 @@ package pl.caltha.akka.cluster
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import org.mockito.Mockito
-
 import org.scalatest.Finders
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.mock.MockitoSugar
-
 import akka.actor.ActorSystem
 import akka.actor.Address
 import akka.actor.FSM.CurrentState
@@ -20,13 +18,10 @@ import akka.stream.StreamTcpException
 import akka.testkit.TestFSMRef
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
-
-import pl.caltha.akka.etcd.EtcdClient
+import me.maciejb.etcd.client.{EtcdClient, EtcdCommandException, EtcdException}
 import pl.caltha.akka.etcd.EtcdNode
 import pl.caltha.akka.etcd.EtcdResponse
-import pl.caltha.akka.etcd.EtcdException
 import pl.caltha.akka.etcd.EtcdError
-import pl.caltha.akka.etcd.EtcdCommandException
 
 class ClusterDiscoveryActorSpec extends EtcdFSMSpecBase[ClusterDiscoveryActor.State, ClusterDiscoveryActor.Data] {
 

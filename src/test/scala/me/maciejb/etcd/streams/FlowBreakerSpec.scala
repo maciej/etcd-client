@@ -1,13 +1,11 @@
-package pl.caltha.akka.streams
+package me.maciejb.etcd.streams
 
-import akka.actor.{ ActorSystem, Cancellable }
-import akka.stream.scaladsl.{ Keep, Source }
-import akka.stream.testkit.scaladsl.{ TestSource, TestSink }
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.testkit.{ TestKit, TestKitBase }
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
-
-import scala.concurrent.duration._
+import akka.actor.ActorSystem
+import akka.stream.scaladsl.Keep
+import akka.stream.testkit.scaladsl.{TestSink, TestSource}
+import akka.stream.{ActorMaterializer, Materializer}
+import akka.testkit.TestKitBase
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class FlowBreakerSpec extends FlatSpec with Matchers with TestKitBase with BeforeAndAfterAll {
 

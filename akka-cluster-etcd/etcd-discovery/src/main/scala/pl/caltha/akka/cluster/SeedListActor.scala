@@ -1,16 +1,13 @@
 package pl.caltha.akka.cluster
 
 import scala.concurrent.Future
-
 import akka.actor.FSM
 import akka.actor.Props
 import akka.actor.Stash
 import akka.actor.Status
 import akka.pattern.pipe
-
-import pl.caltha.akka.etcd.EtcdClient
+import me.maciejb.etcd.client.{EtcdClient, EtcdException}
 import pl.caltha.akka.etcd.EtcdError
-import pl.caltha.akka.etcd.EtcdException
 import pl.caltha.akka.etcd.EtcdNode
 import pl.caltha.akka.etcd.EtcdResponse
 

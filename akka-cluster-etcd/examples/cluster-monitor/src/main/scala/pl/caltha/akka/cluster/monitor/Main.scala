@@ -4,12 +4,11 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.cluster.Cluster
 import akka.http.scaladsl.settings.ClientConnectionSettings
-
+import me.maciejb.etcd.client.EtcdClient
 import pl.caltha.akka.cluster.ClusterDiscovery
 import pl.caltha.akka.cluster.ClusterDiscoverySettings
 import pl.caltha.akka.cluster.monitor.backend.BackendBehavior
 import pl.caltha.akka.cluster.monitor.frontend.FrontendBehavior
-import pl.caltha.akka.etcd.EtcdClient
 
 class Main extends Actor with ActorLogging {
 

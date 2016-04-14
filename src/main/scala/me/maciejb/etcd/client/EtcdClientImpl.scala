@@ -1,28 +1,20 @@
-package pl.caltha.akka.etcd
+package me.maciejb.etcd.client
 
 import java.net.URLEncoder
 
-import scala.concurrent.Future
-
-import akka.actor.ActorSystem
-import akka.actor.Cancellable
+import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.HttpCharsets._
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.model.Uri._
 import akka.http.scaladsl.settings.ClientConnectionSettings
-import akka.stream.ActorMaterializer
-import akka.stream.Materializer
-import akka.stream.SourceShape
+import akka.stream.{ActorMaterializer, Materializer, SourceShape}
 import akka.stream.scaladsl._
 import akka.util.ByteString
-
 import spray.json._
 
-import pl.caltha.akka.streams.FlowBreaker
+import scala.concurrent.Future
 
 /**
   * `etcd` client implementation.

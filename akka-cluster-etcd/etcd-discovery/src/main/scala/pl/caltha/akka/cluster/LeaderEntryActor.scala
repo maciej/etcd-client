@@ -1,15 +1,13 @@
 package pl.caltha.akka.cluster
 
 import scala.concurrent.duration.FiniteDuration
-
 import akka.actor.FSM
 import akka.actor.FSM.Failure
 import akka.actor.Props
 import akka.actor.Status
 import akka.pattern.pipe
-import pl.caltha.akka.etcd.EtcdClient
+import me.maciejb.etcd.client.{EtcdClient, EtcdException}
 import pl.caltha.akka.etcd.EtcdError
-import pl.caltha.akka.etcd.EtcdException
 import pl.caltha.akka.etcd.EtcdResponse
 
 /**
