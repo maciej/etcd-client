@@ -1,10 +1,11 @@
 package me.maciejb.etcd.client
 
-import akka.actor.{ActorSystem, Cancellable}
+import akka.actor.{ActorRefFactory, ActorSystem, Cancellable}
 import akka.http.scaladsl.settings.ClientConnectionSettings
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * `etcd` client API
@@ -47,13 +48,15 @@ object EtcdClient {
   /**
     * Creates a new instance of `etcd` client.
     *
-    * @param host host to connect to.
-    * @param port port to connect to, 4001 by default.
+    * @param host               host to connect to.
+    * @param port               port to connect to, 4001 by default.
     * @param httpClientSettings optional client options for Akka HTTP.
-    * @param actorSystem the ActorSystem that will be used for materializing HTTP flows and asynchronous processing.
     */
   def apply(host: String, port: Int = 4001,
-            httpClientSettings: Option[ClientConnectionSettings] = None)(implicit actorSystem: ActorSystem) =
-    new EtcdClientImpl(host, port, httpClientSettings)(actorSystem)
+            httpClientSettings: Option[ClientConnectionSettings] = None)
+           (implicit ec: ExecutionContext,
+            system: ActorSystem,
+            mat: Materializer): EtcdClient =
+    new EtcdClientImpl(host, port, httpClientSettings)
 
 }

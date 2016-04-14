@@ -6,23 +6,30 @@ import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpCharsets._
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Uri._
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.settings.ClientConnectionSettings
-import akka.stream.{ActorMaterializer, Materializer, SourceShape}
 import akka.stream.scaladsl._
+import akka.stream.{Materializer, SourceShape}
 import akka.util.ByteString
 import me.maciejb.etcd.streams.FlowBreaker
 import spray.json._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * `etcd` client implementation.
   */
 private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
-                                   httpClientSettings: Option[ClientConnectionSettings] = None)(implicit system: ActorSystem) extends EtcdClient {
+                                   httpClientSettings: Option[ClientConnectionSettings] = None)
+                                  (implicit ec: ExecutionContext,
+                                   system: ActorSystem,
+                                   mat: Materializer) extends EtcdClient {
+
+  private val http =
+    Http(system).outgoingConnection(host, port,
+      settings = httpClientSettings.getOrElse(ClientConnectionSettings(system)))
 
   private def bool(name: String, value: Boolean): Option[(String, String)] =
     if (value) Some(name → value.toString) else None
@@ -31,37 +38,35 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
     option map { case value ⇒ name → value.toString }
 
   def get(key: String, recursive: Boolean, sorted: Boolean): Future[EtcdResponse] =
-    run(GET, key, bool("recursive", recursive), bool("sorted", sorted))
+    call(GET, key, bool("recursive", recursive), bool("sorted", sorted))
 
   def wait(key: String, waitIndex: Option[Int] = None, recursive: Boolean,
            sorted: Boolean, quorum: Boolean): Future[EtcdResponse] =
-    run(GET, key, Some("wait" → "true"), opt("waitIndex", waitIndex),
+    call(GET, key, Some("wait" → "true"), opt("waitIndex", waitIndex),
       bool("recursive", recursive), bool("sorted", sorted), bool("quorum", quorum))
 
   def set(key: String, value: String, ttl: Option[Int] = None): Future[EtcdResponse] =
-    run(PUT, key, Some("value" → value), opt("ttl", ttl))
+    call(PUT, key, Some("value" → value), opt("ttl", ttl))
 
   def compareAndSet(key: String, value: String, ttl: Option[Int] = None, prevValue: Option[String] = None,
                     prevIndex: Option[Int] = None, prevExist: Option[Boolean] = None): Future[EtcdResponse] =
-    run(PUT, key, Some("value" → value), opt("ttl", ttl), opt("prevValue", prevValue),
+    call(PUT, key, Some("value" → value), opt("ttl", ttl), opt("prevValue", prevValue),
       opt("prevIndex", prevIndex), opt("prevExist", prevExist))
 
   def clearTTL(key: String): Future[EtcdResponse] =
-    run(PUT, key, Some("ttl" → ""), Some("prevExists" → "true"))
+    call(PUT, key, Some("ttl" → ""), Some("prevExists" → "true"))
 
   def create(parentKey: String, value: String): Future[EtcdResponse] =
-    run(POST, parentKey, Some("value" → value))
+    call(POST, parentKey, Some("value" → value))
 
   def createDir(key: String, ttl: Option[Int] = None): Future[EtcdResponse] =
-    run(PUT, key, Some("dir" → "true"), opt("ttl", ttl))
+    call(PUT, key, Some("dir" → "true"), opt("ttl", ttl))
 
   def delete(key: String, recursive: Boolean = false): Future[EtcdResponse] =
-    run(DELETE, key, bool("recursive", recursive))
+    call(DELETE, key, bool("recursive", recursive))
 
   def compareAndDelete(key: String, prevValue: Option[String] = None, prevIndex: Option[Int] = None): Future[EtcdResponse] =
-    run(DELETE, key, opt("prevValue", prevValue), opt("prevIndex", prevIndex))
-
-  private implicit val executionContext = system.dispatcher
+    call(DELETE, key, opt("prevValue", prevValue), opt("prevIndex", prevIndex))
 
   def watch(key: String, waitIndex: Option[Int] = None, recursive: Boolean,
             quorum: Boolean): Source[EtcdResponse, Cancellable] = {
@@ -94,11 +99,6 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
 
   // ---------------------------------------------------------------------------------------------
 
-  private implicit val Materializer: Materializer = ActorMaterializer()
-
-  private val client =
-    Http(system).outgoingConnection(host, port, settings = httpClientSettings.getOrElse(ClientConnectionSettings(system)))
-
   private val decode = Flow[HttpResponse].mapAsync(1)(response ⇒ {
     response.entity.dataBytes.runFold(ByteString.empty)(_ ++ _).
       map(_.utf8String).map { body ⇒
@@ -109,7 +109,7 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
   })
 
   private def run(req: HttpRequest): Future[EtcdResponse] =
-    Source.single(req).via(client).via(decode).runWith(Sink.head)
+    Source.single(req).via(http).via(decode).runWith(Sink.head)
 
   private def mkParams(params: Seq[Option[(String, String)]]) =
     params.collect { case Some((k, v)) ⇒ (k, v) }
@@ -133,10 +133,11 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
       case (path, segment) ⇒ path / segment
     }
 
-  private def run(method: HttpMethod, key: String, params: Option[(String, String)]*): Future[EtcdResponse] =
+  private def call(method: HttpMethod, key: String, params: Option[(String, String)]*): Future[EtcdResponse] =
     run(if (method == GET || method == DELETE) {
       HttpRequest(method, Uri(path = keyPath(key)).withQuery(mkQuery(params.toSeq)))
     } else {
       HttpRequest(method, Uri(path = keyPath(key)), entity = mkEntity(params.toSeq))
     })
+
 }
