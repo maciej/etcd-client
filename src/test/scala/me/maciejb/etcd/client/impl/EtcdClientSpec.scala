@@ -6,6 +6,7 @@ import akka.stream.scaladsl.Keep
 import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
 import me.maciejb.etcd.client.{EtcdError, _}
+import me.maciejb.etcd.dockermachine.DockerMachineIp
 import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -19,7 +20,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   implicit val mat = ActorMaterializer()
   implicit val ec = system.dispatcher
 
-  val etcd = EtcdClient("localhost")
+  val etcd = EtcdClient(DockerMachineIp.address)
 
   implicit class RecoverError(resp: Future[EtcdResponse]) {
     def error: Future[EtcdMessage] = resp.recover {
