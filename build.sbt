@@ -9,7 +9,7 @@ lazy val client = project.in(file("."))
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-      "com.typesafe.akka" %% "akka-http-experimental" % akkaVersion,
+      "com.typesafe.akka" %% "akka-http-core" % akkaVersion,
       "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion,
       "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
       "org.mockito" % "mockito-core" % mockitoVersion % "test",
