@@ -1,13 +1,11 @@
-package me.maciejb.etcd.client
+package me.maciejb.etcd.client.impl
+
+import akka.actor.{Actor, ActorRef, Props, Status}
+import akka.pattern.pipe
+import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
-
-import akka.actor.Actor
-import akka.actor.ActorRef
-import akka.actor.Props
-import akka.actor.Status
-import akka.pattern.pipe
 
 /**
   * This actor will attempt the specified `operation` up to `retries` number of times, sends the
@@ -25,7 +23,7 @@ import akka.pattern.pipe
   *        unsuccessful operation will be sent back. When negative argument is used, retries will be occur
   *        indefinitely.
   */
-class EtcdOperationActor(operation: EtcdClient ⇒ Future[EtcdResponse], replyTo: ActorRef, etcd: EtcdClient,
+private[client] class EtcdOperationActor(operation: EtcdClient ⇒ Future[EtcdResponse], replyTo: ActorRef, etcd: EtcdClient,
                          returnErrors: Traversable[Int], retryDelay: FiniteDuration, retries: Int) extends Actor {
 
   import EtcdOperationActor._
@@ -75,7 +73,7 @@ class EtcdOperationActor(operation: EtcdClient ⇒ Future[EtcdResponse], replyTo
 /**
   * A factory for `EtcdOperationActor` `Props`.
   */
-object EtcdOperationActor {
+private[client] object EtcdOperationActor {
 
   /**
     * Create `akka.actor.Props` needed to instantiate `EtcdOperationActor`
