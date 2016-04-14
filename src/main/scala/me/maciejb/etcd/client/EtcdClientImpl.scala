@@ -6,12 +6,14 @@ import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpCharsets._
 import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Uri._
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.{ActorMaterializer, Materializer, SourceShape}
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import me.maciejb.etcd.streams.FlowBreaker
 import spray.json._
 
 import scala.concurrent.Future
@@ -100,10 +102,10 @@ private[etcd] class EtcdClientImpl(host: String, port: Int = 4001,
   private val decode = Flow[HttpResponse].mapAsync(1)(response ⇒ {
     response.entity.dataBytes.runFold(ByteString.empty)(_ ++ _).
       map(_.utf8String).map { body ⇒
-        import EtcdJsonProtocol._
-        if (response.status.isSuccess) body.parseJson.convertTo[EtcdResponse]
-        else throw EtcdException(body.parseJson.convertTo[EtcdError])
-      }
+      import EtcdJsonProtocol._
+      if (response.status.isSuccess) body.parseJson.convertTo[EtcdResponse]
+      else throw EtcdException(body.parseJson.convertTo[EtcdError])
+    }
   })
 
   private def run(req: HttpRequest): Future[EtcdResponse] =

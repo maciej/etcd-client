@@ -3,10 +3,11 @@ package me.maciejb.etcd.client
 import java.time.Month
 
 import org.scalatest.{FlatSpec, Matchers}
-import pl.caltha.akka.etcd.EtcdJsonProtocol._
 import spray.json._
 
 class EtcdJsonProtocolSpec extends FlatSpec with Matchers {
+
+  import EtcdJsonProtocol._
 
   "EtcdJsonProtocol" should "deserialize node with defined expiration time" in {
     val node = """{
