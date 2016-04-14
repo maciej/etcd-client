@@ -13,5 +13,8 @@ accomplished using Docker:
 docker run -d --name etcd --net host quay.io/coreos/etcd:v2.2.0
 ```
 
+## Resources
+* [etcd-client at bintray](https://bintray.com/maciej/maven/etcd-client/)
+
 [travis-ci-badge]: https://travis-ci.org/maciej/etcd-client.svg
 [travis-ci-link]: https://travis-ci.org/maciej/etcd-client
