@@ -7,26 +7,19 @@ import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
 import org.scalatest.Matchers._
 import org.scalatest._
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.time._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll {
+class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll with IntegrationPatience{
 
   implicit val system = ActorSystem()
-
-  override def afterAll() = TestKit.shutdownActorSystem(system)
-
-  implicit val exCtx = system.dispatcher
-
   implicit val mat = ActorMaterializer()
+  implicit val ec = system.dispatcher
 
   val etcd = EtcdClient("localhost")
-
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(100, Millis))
 
   implicit class RecoverError(resp: Future[EtcdResponse]) {
     def error: Future[EtcdMessage] = resp.recover {
@@ -269,4 +262,6 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
       }
     }
   }
+
+  override protected def afterAll() = TestKit.shutdownActorSystem(system)
 }
