@@ -31,11 +31,15 @@ trait EtcdClient {
                     prevIndex: Option[Int] = None,
                     prevExist: Option[Boolean] = None): Future[EtcdResponse]
 
+  def refreshTtl(key: String, ttl: Int): Future[EtcdResponse]
+
   def clearTtl(key: String): Future[EtcdResponse]
 
   def create(parentKey: String, value: String): Future[EtcdResponse]
 
   def createDir(key: String, ttl: Option[Int] = None): Future[EtcdResponse]
+
+  def refreshDirTtl(key: String, ttl: Int): Future[EtcdResponse]
 
   def delete(key: String, recursive: Boolean = false): Future[EtcdResponse]
 

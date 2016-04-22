@@ -54,6 +54,9 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
     call(PUT, key, Some("value" → value), opt("ttl", ttl), opt("prevValue", prevValue),
       opt("prevIndex", prevIndex), opt("prevExist", prevExist))
 
+  def refreshTtl(key: String, ttl: Int): Future[EtcdResponse] =
+    call(PUT, key, Some("ttl" → ttl.toString), Some("refresh" → "true"), Some("prevExist" → "true"))
+
   def clearTtl(key: String): Future[EtcdResponse] =
     call(PUT, key, Some("ttl" → ""), Some("prevExist" → "true"))
 
@@ -62,6 +65,9 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
 
   def createDir(key: String, ttl: Option[Int] = None): Future[EtcdResponse] =
     call(PUT, key, Some("dir" → "true"), opt("ttl", ttl))
+
+  def refreshDirTtl(key: String, ttl: Int): Future[EtcdResponse] =
+    call(PUT, key, Some("dir" → "true"), Some("ttl" → ttl.toString), Some("prevExist" → "true"))
 
   def delete(key: String, recursive: Boolean = false): Future[EtcdResponse] =
     call(DELETE, key, bool("recursive", recursive))
