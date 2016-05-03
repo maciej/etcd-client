@@ -10,8 +10,8 @@ sealed trait EtcdMessage
 /**
   * A response returned after a successful operation.
   *
-  * @param action action that was performed one of: `get`, `set`, `create`, `delete`, `compareAndSwap`, `compareAndDelete`.
-  * @param node the node on which operation was performed
+  * @param action   action that was performed one of: `get`, `set`, `create`, `delete`, `compareAndSwap`, `compareAndDelete`.
+  * @param node     the node on which operation was performed
   * @param prevNode previous state of the node before the operation, returned for `set` and `compareAndSwap` operations.
   */
 case class EtcdResponse(action: String, node: EtcdNode, prevNode: Option[EtcdNode]) extends EtcdMessage
@@ -20,9 +20,9 @@ case class EtcdResponse(action: String, node: EtcdNode, prevNode: Option[EtcdNod
   * A response returned after a failed operation.
   *
   * @param errorCode numerical error code.
-  * @param message textual error message.
-  * @param cause additional information about the error.
-  * @param index current write index of the node on which operation was requested.
+  * @param message   textual error message.
+  * @param cause     additional information about the error.
+  * @param index     current write index of the node on which operation was requested.
   */
 case class EtcdError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdMessage
 
@@ -42,7 +42,7 @@ object EtcdError {
   /** Error codes related to `etcd` internal problems. */
   val InternalError = Range(300, Int.MaxValue)
 
-  /** Key not found.*/
+  /** Key not found. */
   val KeyNotFound = 100
 
   /** Compare failed. */
@@ -94,14 +94,14 @@ object EtcdError {
 /**
   * Represents a node in `etcd` key space.
   *
-  * @param key the node's key. In case of nested nodes, is prepended with a path composed of parent directory
-  *            nodes' keys, separated with `/` characters
-  * @param createdIndex journal index at which the node was created.
+  * @param key           the node's key. In case of nested nodes, is prepended with a path composed of parent directory
+  *                      nodes' keys, separated with `/` characters
+  * @param createdIndex  journal index at which the node was created.
   * @param modifiedIndex journal index at which the node was most recently modified.
-  * @param expiration node expiration time.
-  * @param value the value stored in the node.
-  * @param dir a flag indicating if the node is a directory or leaf ("file") node.
-  * @param nodes directory's immediate child nodes, returned on a recursive `get` operation.
+  * @param expiration    node expiration time.
+  * @param value         the value stored in the node.
+  * @param dir           a flag indicating if the node is a directory or leaf ("file") node.
+  * @param nodes         directory's immediate child nodes, returned on a recursive `get` operation.
   */
 case class EtcdNode(key: String,
                     createdIndex: Int,
