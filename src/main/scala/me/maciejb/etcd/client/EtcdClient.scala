@@ -59,14 +59,16 @@ trait EtcdClient {
   */
 object EtcdClient {
 
+  val DefaultPort = 2379
+
   /**
     * Creates a new instance of `etcd` client.
     *
     * @param host               host to connect to.
-    * @param port               port to connect to, 4001 by default.
+    * @param port               port to connect to, 2379 by default.
     * @param httpClientSettings optional client options for Akka HTTP.
     */
-  def apply(host: String, port: Int = 4001,
+  def apply(host: String, port: Int = DefaultPort,
             httpClientSettings: Option[ClientConnectionSettings] = None)
            (implicit ec: ExecutionContext,
             system: ActorSystem,
