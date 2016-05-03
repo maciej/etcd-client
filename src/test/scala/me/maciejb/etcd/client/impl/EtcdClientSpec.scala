@@ -1,5 +1,7 @@
 package me.maciejb.etcd.client.impl
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Keep
@@ -14,7 +16,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll with IntegrationPatience{
+class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll with IntegrationPatience {
 
   implicit val system = ActorSystem()
   implicit val mat = ActorMaterializer()
@@ -28,13 +30,15 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
     }
   }
 
-  val baseKey = s"${(Math.random() * Int.MaxValue).toInt}/"
+  val baseKey = s"${UUID.randomUUID().toString}/"
 
-  "etcd client" should "get and set individual keys" in {
-    whenReady(for {
+  it should "get and set individual keys" in {
+    val respFut = for {
       _ ← etcd.set(baseKey + "one", "1")
       resp ← etcd.get(baseKey + "one")
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       resp should matchPattern {
         case EtcdResponse("get", EtcdNode(_, _, _, _, Some("1"), _, None), _) ⇒
       }
@@ -42,10 +46,12 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   it should "create and delete individual keys" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.set(baseKey + "simple", "one")
       resp ← etcd.delete(baseKey + "simple")
-    } yield resp) { resp1 ⇒
+    } yield resp
+
+    whenReady(respFut) { resp1 ⇒
       resp1 should matchPattern {
         case EtcdResponse("delete", _, _) ⇒
       }
@@ -59,31 +65,35 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   it should "create directories and list their contents" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.createDir(baseKey + "dir")
       _ ← etcd.set(baseKey + "dir/one", "1")
       _ ← etcd.set(baseKey + "dir/two", "2")
       _ ← etcd.set(baseKey + "dir/three", "3")
       resp ← etcd.get(baseKey + "dir", recursive = true)
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       inside(resp) {
         case EtcdResponse("get", EtcdNode(_, _, _, _, _, Some(true), Some(nodes)), _) ⇒
           nodes collect {
-            case EtcdNode(_, _, _, _, Some(value), _, _) ⇒ value
+            case EtcdNode(_, _, _, _, Some(v), _, _) ⇒ v
           } should contain allOf("1", "2", "3")
       }
     }
   }
 
   it should "create directories and delete them recursively" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.createDir(baseKey + "dir2")
       _ ← etcd.set(baseKey + "dir2/one", "1")
       _ ← etcd.set(baseKey + "dir2/two", "2")
       _ ← etcd.set(baseKey + "dir2/three", "3")
       _ ← etcd.delete(baseKey + "dir2", recursive = true)
       resp ← etcd.get(baseKey + "dir2", recursive = true).error
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       resp should matchPattern {
         case EtcdError(100, _, _, _) ⇒
       }
@@ -104,11 +114,13 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
     }
   }
 
-  it should "set keys conditionally, wrt. key's current value" in {
-    whenReady(for {
+  "compareAndSet" should "set keys conditionally, wrt. key's current value" in {
+    val respFut = for {
       _ ← etcd.set(baseKey + "atom2", "1")
       resp1 ← etcd.compareAndSet(baseKey + "atom2", "2", prevValue = Some("1"))
-    } yield resp1) { resp1 ⇒
+    } yield resp1
+
+    whenReady(respFut) { resp1 ⇒
       resp1 should matchPattern {
         case EtcdResponse("compareAndSwap", _, _) ⇒
       }
@@ -179,18 +191,20 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   it should "create new unique keys and retrieve them in order" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.createDir(baseKey + "dir3")
       _ ← etcd.create(baseKey + "dir3", "1")
       _ ← etcd.create(baseKey + "dir3", "2")
       _ ← etcd.create(baseKey + "dir3", "3")
       resp ← etcd.get(baseKey + "dir3", recursive = true, sorted = true)
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       inside(resp) {
         case EtcdResponse("get", EtcdNode(_, _, _, _, _, Some(true), Some(nodes)), _) ⇒
           val Key = s"/${baseKey}dir3/(\\d+)".r
           val (keys, values) = (nodes collect {
-            case EtcdNode(Key(seq), _, _, _, Some(value), _, _) ⇒ (seq.toInt, value)
+            case EtcdNode(Key(seq), _, _, _, Some(v), _, _) ⇒ (seq.toInt, v)
           }).unzip
           keys shouldBe sorted
           values should contain inOrderOnly("1", "2", "3")
@@ -226,13 +240,15 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   it should "provide a stream of updates to a key" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.createDir(baseKey + "watch1")
       resp ← etcd.create(baseKey + "watch1", "1")
       _ ← etcd.create(baseKey + "watch1", "2")
       _ ← etcd.create(baseKey + "watch1", "3")
       _ ← etcd.get(baseKey + "watch1", recursive = true, sorted = true)
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       val createdIndex = resp.node.createdIndex
       whenReady(etcd.watch(baseKey + "watch1", Some(createdIndex), true).take(3).runFold(Seq[EtcdResponse]()) {
         case (resps, r) ⇒ r +: resps
@@ -243,14 +259,16 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   it should "allow cancelling the stream of updates" in {
-    whenReady(for {
+    val respFut = for {
       _ ← etcd.createDir(baseKey + "watch2")
       resp ← etcd.create(baseKey + "watch2", "1")
       _ ← etcd.create(baseKey + "watch2", "2")
       _ ← etcd.create(baseKey + "watch2", "3")
-    } yield resp) { resp ⇒
+    } yield resp
+
+    whenReady(respFut) { resp ⇒
       val createdIndex = resp.node.createdIndex
-      val source = etcd.watch(baseKey + "watch2", Some(createdIndex), true)
+      val source = etcd.watch(baseKey + "watch2", Some(createdIndex), recursive = true)
       val sink = TestSink.probe[EtcdResponse]
       val (cancellable, probe) = source.toMat(sink)(Keep.both).run()
       probe.within(1.second) {
@@ -265,4 +283,5 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   }
 
   override protected def afterAll() = TestKit.shutdownActorSystem(system)
+
 }

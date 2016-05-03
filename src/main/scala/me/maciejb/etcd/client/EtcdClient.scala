@@ -1,6 +1,6 @@
 package me.maciejb.etcd.client
 
-import akka.actor.{ActorRefFactory, ActorSystem, Cancellable}
+import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
