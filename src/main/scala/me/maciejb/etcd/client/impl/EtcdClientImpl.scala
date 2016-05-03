@@ -14,7 +14,6 @@ import akka.stream.scaladsl._
 import akka.stream._
 import akka.util.ByteString
 import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
-import me.maciejb.etcd.streams.FlowBreaker
 import spray.json._
 
 import scala.concurrent.{ExecutionContext, Future}
