@@ -11,10 +11,9 @@ import akka.http.scaladsl.model.Uri._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.scaladsl._
-import akka.stream.{Materializer, SourceShape}
+import akka.stream._
 import akka.util.ByteString
 import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
-import me.maciejb.etcd.streams.FlowBreaker
 import spray.json._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,10 +22,10 @@ import scala.concurrent.{ExecutionContext, Future}
   * `etcd` client implementation.
   */
 private[client] class EtcdClientImpl(host: String, port: Int = 4001,
-                                   httpClientSettings: Option[ClientConnectionSettings] = None)
-                                  (implicit ec: ExecutionContext,
-                                   system: ActorSystem,
-                                   mat: Materializer) extends EtcdClient {
+                                     httpClientSettings: Option[ClientConnectionSettings] = None)
+                                    (implicit ec: ExecutionContext,
+                                     system: ActorSystem,
+                                     mat: Materializer) extends EtcdClient {
 
   private val http =
     Http(system).outgoingConnection(host, port,
@@ -81,6 +80,19 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
     case class WatchRequest(key: String, waitIndex: Option[Int], recursive: Boolean, quorum: Boolean)
     val init = WatchRequest(key, waitIndex, recursive, quorum)
 
+    def killSwitchToCancellable(killSwitch: UniqueKillSwitch): Cancellable = new Cancellable {
+      @volatile private[this] var cancelled: Boolean = false
+
+      override def isCancelled: Boolean = cancelled
+
+      override def cancel(): Boolean = {
+        killSwitch.shutdown()
+        cancelled = true
+        true
+      }
+
+    }
+
     Source.fromGraph(
       GraphDSL.create[SourceShape[EtcdResponse]]() { implicit b ⇒
         import GraphDSL.Implicits._
@@ -101,7 +113,8 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
         // @formatter:on format: ON
 
         SourceShape(respUnzip.out1)
-      }).named("watch").viaMat(FlowBreaker[EtcdResponse])(Keep.right)
+      }).named("watch")
+      .viaMat(KillSwitches.single) { case (_, r) => killSwitchToCancellable(r) }
   }
 
   // ---------------------------------------------------------------------------------------------
