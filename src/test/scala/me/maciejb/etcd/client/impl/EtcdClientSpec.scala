@@ -13,7 +13,6 @@ import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeAndAfterAll with IntegrationPatience {
@@ -23,12 +22,6 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   implicit val ec = system.dispatcher
 
   val etcd = EtcdClient(DockerMachineIp.address)
-
-  implicit class RecoverError(resp: Future[EtcdResponse]) {
-    def error: Future[EtcdMessage] = resp.recover {
-      case ex: EtcdException ⇒ ex.error
-    }
-  }
 
   val baseKey = s"${UUID.randomUUID().toString}/"
 
@@ -56,7 +49,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
         case EtcdResponse("delete", _, _) ⇒
       }
 
-      whenReady(etcd.get(baseKey + "simple").error) { resp2 ⇒
+      whenReady(etcd.get(baseKey + "simple").failed) { resp2 ⇒
         resp2 should matchPattern {
           case EtcdError(100, _, _, _) ⇒
         }
@@ -90,10 +83,10 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
       _ ← etcd.set(baseKey + "dir2/two", "2")
       _ ← etcd.set(baseKey + "dir2/three", "3")
       _ ← etcd.delete(baseKey + "dir2", recursive = true)
-      resp ← etcd.get(baseKey + "dir2", recursive = true).error
+      resp ← etcd.get(baseKey + "dir2", recursive = true).failed
     } yield resp
 
-    whenReady(respFut) { resp ⇒
+    whenReady(respFut) { case resp ⇒
       resp should matchPattern {
         case EtcdError(100, _, _, _) ⇒
       }
@@ -106,7 +99,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
         case EtcdResponse("create", _, _) ⇒
       }
 
-      whenReady(etcd.compareAndSet(baseKey + "atom1", "1", prevExist = Some(false)).error) { resp2 ⇒
+      whenReady(etcd.compareAndSet(baseKey + "atom1", "1", prevExist = Some(false)).failed) { case resp2 ⇒
         resp2 should matchPattern {
           case EtcdError(105, _, _, _) ⇒
         }
@@ -125,7 +118,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
         case EtcdResponse("compareAndSwap", _, _) ⇒
       }
 
-      whenReady(etcd.compareAndSet(baseKey + "atom2", "3", prevValue = Some("1")).error) { resp2 ⇒
+      whenReady(etcd.compareAndSet(baseKey + "atom2", "3", prevValue = Some("1")).failed) { case resp2 ⇒
         resp2 should matchPattern {
           case EtcdError(101, _, _, _) ⇒
         }
@@ -143,7 +136,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
               case EtcdResponse("compareAndSwap", _, _) ⇒
             }
 
-            whenReady(etcd.compareAndSet(baseKey + "atom2", "3", prevIndex = Some(createdIndex)).error) { resp3 ⇒
+            whenReady(etcd.compareAndSet(baseKey + "atom2", "3", prevIndex = Some(createdIndex)).failed) { case resp3 ⇒
               resp3 should matchPattern {
                 case EtcdError(101, _, _, _) ⇒
               }
@@ -156,8 +149,8 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
   it should "delete keys conditionally, wrt. key's current value" in {
     whenReady(for {
       _ ← etcd.set(baseKey + "atom4", "1")
-      resp1 ← etcd.compareAndDelete(baseKey + "atom4", prevValue = Some("2")).error
-    } yield resp1) { resp1 ⇒
+      resp1 ← etcd.compareAndDelete(baseKey + "atom4", prevValue = Some("2")).failed
+    } yield resp1) { case resp1 ⇒
       resp1 should matchPattern {
         case EtcdError(101, _, _, _) ⇒
       }
@@ -175,7 +168,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
       inside(resp1) {
         case EtcdResponse("set", EtcdNode(_, createdIndex, _, _, Some("1"), _, None), _) ⇒
 
-          whenReady(etcd.compareAndDelete(baseKey + "atom5", prevIndex = Some(createdIndex - 1)).error) { resp2 ⇒
+          whenReady(etcd.compareAndDelete(baseKey + "atom5", prevIndex = Some(createdIndex - 1)).failed) { case resp2 ⇒
             resp2 should matchPattern {
               case EtcdError(101, _, _, _) ⇒
             }

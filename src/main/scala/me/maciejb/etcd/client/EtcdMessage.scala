@@ -17,14 +17,26 @@ sealed trait EtcdMessage
 case class EtcdResponse(action: String, node: EtcdNode, prevNode: Option[EtcdNode]) extends EtcdMessage
 
 /**
-  * A response returned after a failed operation.
-  *
-  * @param errorCode numerical error code.
-  * @param message   textual error message.
-  * @param cause     additional information about the error.
-  * @param index     current write index of the node on which operation was requested.
+  * A response returned after a failed operation
   */
-case class EtcdError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdMessage
+abstract class EtcdError extends RuntimeException with EtcdMessage {
+
+  /** numerical error code */
+  def errorCode: Int
+
+  /** textual error message */
+  def message: String
+
+  /** additional information about the error */
+  def cause: String
+
+  /** current write index of the node on which operation was requested */
+  def index: Int
+}
+
+case class EtcdCommandError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdError
+case class EtcdInternalError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdError
+case class EtcdPostFormError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdError
 
 /**
   * Various `etcd` error codes are provided as constants.
@@ -32,6 +44,15 @@ case class EtcdError(errorCode: Int, message: String, cause: String, index: Int)
   * See also [[https://coreos.com/etcd/docs/latest/errorcode.html Etcd documentation]]
   */
 object EtcdError {
+
+  def unapply(arg: EtcdError): Option[(Int, String, String, Int)] =
+    Some((arg.errorCode, arg.message, arg.cause, arg.index))
+
+  def apply(errorCode: Int, message: String, cause: String, index: Int) = {
+    if (CommandError.contains(errorCode)) new EtcdCommandError(errorCode, message, cause, index)
+    else if (POSTFormError.contains(errorCode)) new EtcdPostFormError(errorCode, message, cause, index)
+    else new EtcdInternalError(errorCode, message, cause, index)
+  }
 
   /** Error codes related to issued command. */
   val CommandError = Range(100, 199)

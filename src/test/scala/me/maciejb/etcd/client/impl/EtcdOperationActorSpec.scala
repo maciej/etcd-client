@@ -3,7 +3,7 @@ package me.maciejb.etcd.client.impl
 import akka.actor.ActorSystem
 import akka.stream.StreamTcpException
 import akka.testkit.{TestKit, TestProbe}
-import me.maciejb.etcd.client.{EtcdException, _}
+import me.maciejb.etcd.client._
 import org.mockito.Mockito.when
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 import org.scalatest.mock.MockitoSugar
@@ -52,7 +52,7 @@ class EtcdOperationActorSpec(_system: ActorSystem) extends TestKit(_system)
     }
     val reply = EtcdError(EtcdError.TestFailed, "Compare failed", "value2 != value1", 120)
     probe.watch(actor)
-    promise.failure(EtcdException(reply))
+    promise.failure(reply)
     probe.expectMsg(reply)
     probe.expectTerminated(actor, 1.second)
   }
@@ -65,7 +65,7 @@ class EtcdOperationActorSpec(_system: ActorSystem) extends TestKit(_system)
       etcd.get("/key", false, false)
     }
     probe.watch(actor)
-    promise1.failure(EtcdException(EtcdError(EtcdError.RaftInternal, "", "", 100)))
+    promise1.failure(EtcdError(EtcdError.RaftInternal, "", "", 100))
     val reply = EtcdResponse("get", EtcdNode("/key", 100, 100, None, Some("value"), None, None), None)
     promise2.success(reply)
     probe.expectMsg(reply)

@@ -2,7 +2,7 @@ package me.maciejb.etcd.client.impl
 
 import akka.actor.{Actor, ActorRef, Props, Status}
 import akka.pattern.pipe
-import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
+import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdResponse}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
@@ -39,7 +39,7 @@ private[client] class EtcdOperationActor(operation: EtcdClient ⇒ Future[EtcdRe
 
     // Send the request to `etcd` server and schedule a timeout event.
     operation(etcd).recover {
-      case EtcdException(error) ⇒ error
+      case e : EtcdError ⇒ e
     }.pipeTo(self)
 
     {

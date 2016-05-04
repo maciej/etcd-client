@@ -12,9 +12,29 @@ import spray.json._
 private[client] object EtcdJsonProtocol extends DefaultJsonProtocol {
 
   /** Spray JSON format for [[EtcdError]] case class. */
-  implicit val etcdErrorFormat = jsonFormat4(EtcdError.apply)
+  implicit val etcdErrorFormat: RootJsonFormat[EtcdError] = new RootJsonFormat[EtcdError] {
 
-  /** Spray JSON format for `java.time.ZonedDateTime` represented as `ISO_ZONED_DATE_TIME` string*/
+    override def write(obj: EtcdError) = {
+      JsObject(
+        "errorCode" -> JsNumber(obj.errorCode),
+        "message" -> JsString(obj.message),
+        "cause" -> JsString(obj.cause),
+        "index" -> JsNumber(obj.index)
+      )
+    }
+
+    override def read(json: JsValue) = {
+      val fields = json.asJsObject.getFields("errorCode", "message", "cause", "index")
+      fields.toList match {
+        case JsNumber(errorCode) :: JsString(message) :: JsString(cause) :: JsNumber(index) :: Nil =>
+          EtcdError(errorCode.toInt, message, cause, index.toInt)
+        case _ => deserializationError(s"Could not deserialize $json to EtcdError")
+      }
+    }
+
+  }
+
+  /** Spray JSON format for `java.time.ZonedDateTime` represented as `ISO_ZONED_DATE_TIME` string */
   implicit object InstantJsonFormat extends RootJsonFormat[ZonedDateTime] {
     val formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME
 

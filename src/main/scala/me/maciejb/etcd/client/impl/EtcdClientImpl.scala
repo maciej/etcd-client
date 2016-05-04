@@ -13,7 +13,7 @@ import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.scaladsl._
 import akka.stream._
 import akka.util.ByteString
-import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdException, EtcdResponse}
+import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdResponse}
 import spray.json._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -124,7 +124,7 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
       map(_.utf8String).map { body ⇒
       import EtcdJsonProtocol._
       if (response.status.isSuccess) body.parseJson.convertTo[EtcdResponse]
-      else throw EtcdException(body.parseJson.convertTo[EtcdError])
+      else throw body.parseJson.convertTo[EtcdError]
     }
   })
 
