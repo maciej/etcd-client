@@ -25,7 +25,7 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
 
   val baseKey = s"${UUID.randomUUID().toString}/"
 
-  it should "get and set individual keys" in {
+  "EtcdClient" should "get and set individual keys" in {
     val respFut = for {
       _ ← etcd.set(baseKey + "one", "1")
       resp ← etcd.get(baseKey + "one")
@@ -38,7 +38,19 @@ class EtcdClientSpec extends FlatSpec with ScalaFutures with Inside with BeforeA
     }
   }
 
-  it should "create and delete individual keys" in {
+  "get" should "result in a EtcdCommandError if key is nonexistent" in {
+    val respFut = etcd.get(baseKey + "does-not-exist")
+
+    whenReady(respFut.failed) { resp =>
+      resp shouldBe a[EtcdCommandError]
+      resp match {
+        case error: EtcdCommandError =>
+          error.errorCode shouldEqual 100
+      }
+    }
+  }
+
+  "EtcdClient" should "create and delete individual keys" in {
     val respFut = for {
       _ ← etcd.set(baseKey + "simple", "one")
       resp ← etcd.delete(baseKey + "simple")
