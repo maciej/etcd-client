@@ -19,7 +19,7 @@ case class EtcdResponse(action: String, node: EtcdNode, prevNode: Option[EtcdNod
 /**
   * A response returned after a failed operation
   */
-abstract class EtcdError extends RuntimeException with EtcdMessage {
+abstract class EtcdError extends RuntimeException with EtcdMessage with Product {
 
   /** numerical error code */
   def errorCode: Int
@@ -32,6 +32,8 @@ abstract class EtcdError extends RuntimeException with EtcdMessage {
 
   /** current write index of the node on which operation was requested */
   def index: Int
+
+  override def toString = s"${getClass.getSimpleName}(${productIterator.mkString(",")})"
 }
 
 case class EtcdCommandError(errorCode: Int, message: String, cause: String, index: Int) extends EtcdError
