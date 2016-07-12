@@ -24,14 +24,16 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 private[client] class EtcdClientImpl(host: String, port: Int = 4001,
                                      httpClientSettings: Option[ClientConnectionSettings] = None,
-                                     httpHeaders: immutable.Seq[HttpHeader] = Nil)
+                                     httpHeaders: immutable.Seq[HttpHeader] = Nil,
+                                     sslEnabled: Boolean = false)
                                     (implicit ec: ExecutionContext,
                                      system: ActorSystem,
                                      mat: Materializer) extends EtcdClient {
 
-  private val http =
-    Http(system).outgoingConnection(host, port,
-      settings = httpClientSettings.getOrElse(ClientConnectionSettings(system)))
+  private val http = if (sslEnabled) Http(system).outgoingConnectionHttps(host, port,
+    settings = httpClientSettings.getOrElse(ClientConnectionSettings(system)))
+  else Http(system).outgoingConnection(host, port,
+    settings = httpClientSettings.getOrElse(ClientConnectionSettings(system)))
 
   private def bool(name: String, value: Boolean): Option[(String, String)] =
     if (value) Some(name → value.toString) else None
@@ -109,9 +111,9 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
         val respUnzip = b.add(Unzip[WatchRequest, EtcdResponse]())
 
         // @formatter:off format: OFF
-        initReq                   ~> reqMerge.in(0)
-        respUnzip.out0            ~> reqMerge.in(1)
-                                     reqMerge       ~> runWait ~> respUnzip.in
+        initReq ~> reqMerge.in(0)
+        respUnzip.out0 ~> reqMerge.in(1)
+        reqMerge ~> runWait ~> respUnzip.in
         // @formatter:on format: ON
 
         SourceShape(respUnzip.out1)
