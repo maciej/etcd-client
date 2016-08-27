@@ -16,13 +16,15 @@ import akka.util.ByteString
 import me.maciejb.etcd.client.{EtcdClient, EtcdError, EtcdResponse}
 import spray.json._
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * `etcd` client implementation.
   */
 private[client] class EtcdClientImpl(host: String, port: Int = 4001,
-                                     httpClientSettings: Option[ClientConnectionSettings] = None)
+                                     httpClientSettings: Option[ClientConnectionSettings] = None,
+                                     httpHeaders: immutable.Seq[HttpHeader] = Nil)
                                     (implicit ec: ExecutionContext,
                                      system: ActorSystem,
                                      mat: Materializer) extends EtcdClient {
@@ -155,9 +157,9 @@ private[client] class EtcdClientImpl(host: String, port: Int = 4001,
 
   private def call(method: HttpMethod, key: String, params: Option[(String, String)]*): Future[EtcdResponse] =
     run(if (method == GET || method == DELETE) {
-      HttpRequest(method, Uri(path = keyPath(key)).withQuery(mkQuery(params.toSeq)))
+      HttpRequest(method, Uri(path = keyPath(key)).withQuery(mkQuery(params.toSeq)), headers = httpHeaders)
     } else {
-      HttpRequest(method, Uri(path = keyPath(key)), entity = mkEntity(params.toSeq))
+      HttpRequest(method, Uri(path = keyPath(key)), entity = mkEntity(params.toSeq), headers = httpHeaders)
     })
 
 }

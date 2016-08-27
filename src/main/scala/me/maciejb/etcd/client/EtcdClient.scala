@@ -1,11 +1,13 @@
 package me.maciejb.etcd.client
 
 import akka.actor.{ActorSystem, Cancellable}
+import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.settings.ClientConnectionSettings
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import me.maciejb.etcd.client.impl.EtcdClientImpl
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -69,10 +71,11 @@ object EtcdClient {
     * @param httpClientSettings optional client options for Akka HTTP.
     */
   def apply(host: String, port: Int = DefaultPort,
-            httpClientSettings: Option[ClientConnectionSettings] = None)
+            httpClientSettings: Option[ClientConnectionSettings] = None,
+            httpHeaders: immutable.Seq[HttpHeader] = Nil)
            (implicit ec: ExecutionContext,
             system: ActorSystem,
             mat: Materializer): EtcdClient =
-    new EtcdClientImpl(host, port, httpClientSettings)
+    new EtcdClientImpl(host, port, httpClientSettings, httpHeaders)
 
 }
