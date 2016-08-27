@@ -7,7 +7,7 @@ This module provides a fully asynchronous client for etcd 2.x based on [Akka Str
 ## Getting started
 In your `build.sbt` add the following:
 ```scala
-libraryDependencies += "me.maciejb.etcd-client" %% "etcd-client" % "0.1.0"
+libraryDependencies += "me.maciejb.etcd-client" %% "etcd-client" % "0.1.1"
 ```
 
 _etcd-client_ is available for Scala 2.11 and Akka 2.4.
