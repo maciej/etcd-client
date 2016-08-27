@@ -72,10 +72,11 @@ object EtcdClient {
     */
   def apply(host: String, port: Int = DefaultPort,
             httpClientSettings: Option[ClientConnectionSettings] = None,
-            httpHeaders: immutable.Seq[HttpHeader] = Nil)
+            httpHeaders: immutable.Seq[HttpHeader] = Nil,
+            sslEnabled: Boolean = false)
            (implicit ec: ExecutionContext,
             system: ActorSystem,
             mat: Materializer): EtcdClient =
-    new EtcdClientImpl(host, port, httpClientSettings, httpHeaders)
+    new EtcdClientImpl(host, port, httpClientSettings, httpHeaders, sslEnabled)
 
 }
