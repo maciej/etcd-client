@@ -1,4 +1,5 @@
-val akkaVersion = "2.4.3"
+val akkaVersion = "2.4.14"
+val akkaHttpVersion = "10.0.0"
 val scalaTestVersion = "2.2.5"
 val mockitoVersion = "1.10.19"
 
@@ -9,8 +10,8 @@ lazy val client = project.in(file("."))
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-      "com.typesafe.akka" %% "akka-http-core" % akkaVersion,
-      "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion,
+      "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
       "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
       "org.mockito" % "mockito-core" % mockitoVersion % "test",
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
